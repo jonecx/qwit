@@ -94,7 +94,7 @@ private fun AuthorNameView(modifier: Modifier, tweet: Tweet) {
                     letterSpacing = 0.1.sp
                 ),
                 start = 0,
-                end = authorName.indexOf("@") - 1
+                end = authorName.indexOf("@")
             )
             addStyle(
                 style = SpanStyle(

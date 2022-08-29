@@ -20,6 +20,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,11 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonecx.qwit.R
 import com.jonecx.qwit.model.Tweet
 import com.jonecx.qwit.ui.design.component.QwitTopAppBar
 import com.jonecx.qwit.ui.design.theme.QwitTheme
 import com.jonecx.qwit.ui.viewmodel.TweetViewModel
+import com.jonecx.qwit.util.data
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -77,9 +80,10 @@ fun HomeScreen(
             },
             containerColor = Color.Transparent
         ) { innerPadding ->
-            val tweetViewModel = getViewModel<TweetViewModel>()
-//            val homeTimelineUiState by tweetViewModel.homeTimelineState.collectAsStateWithLifecycle()
-//            print(homeTimelineUiState.data?.size ?: "")
+/*            val tweetViewModel = getViewModel<TweetViewModel>()
+           val homeTimelineUiState by tweetViewModel.homeTimelineState.collectAsStateWithLifecycle()
+           val tweets = homeTimelineUiState.data ?: emptyList()*/
+
 
 
             val context = LocalContext.current
@@ -107,7 +111,7 @@ fun HomeScreen(
                 }
 
                 LazyColumn {
-                    items(tweets) {tweet ->
+                    items(tweets) { tweet ->
                         TweetView(tweet = tweet)
                     }
                 }
