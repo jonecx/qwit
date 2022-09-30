@@ -8,6 +8,7 @@
     <string name="account">Account</string>
     <string name="qwit_logo">Qwit logo</string>
     <string name="qwit_error_cloud">Error encountered</string>
+    <string name="retweeted">Retweeted</string>
 
     <!-- Test Tags -->
     <string name="tt_home_screen_center_image">Home Screen Center Image</string>

@@ -4,7 +4,6 @@ import android.net.Uri
 import android.os.Build
 import android.text.format.DateUtils
 import android.text.format.DateUtils.SECOND_IN_MILLIS
-import android.text.format.DateUtils.WEEK_IN_MILLIS
 import com.jonecx.qwit.BuildConfig
 import java.time.Instant
 import java.time.LocalDateTime
@@ -37,5 +36,26 @@ fun String.toDate(): String {
         .atZone(ZoneOffset.UTC)
         .toInstant()
         .toEpochMilli()
-    return DateUtils.getRelativeTimeSpanString(dateTimeMillis, System.currentTimeMillis(), SECOND_IN_MILLIS).toString()
+    return DateUtils.getRelativeTimeSpanString(
+        dateTimeMillis,
+        System.currentTimeMillis(),
+        SECOND_IN_MILLIS,
+        dateFormatFlag(dateTimeMillis)
+    ).toString()
+}
+
+private fun dateFormatFlag(dateTimeMillis: Long): Int {
+    val defaultFormat = DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH
+    return if (isSameYear(dateTimeMillis)) defaultFormat
+    else defaultFormat or DateUtils.FORMAT_SHOW_YEAR
+}
+
+private fun isSameYear(dateTimeMillis: Long): Boolean {
+    val zoneId = ZoneId.systemDefault()
+    val oneInstant = Instant.ofEpochMilli(dateTimeMillis)
+    val oneLocalDateTime = LocalDateTime.ofInstant(oneInstant, zoneId)
+
+    val twoInstant = Instant.ofEpochMilli(System.currentTimeMillis())
+    val twoLocalDateTime = LocalDateTime.ofInstant(twoInstant, zoneId)
+    return oneLocalDateTime.year == twoLocalDateTime.year
 }

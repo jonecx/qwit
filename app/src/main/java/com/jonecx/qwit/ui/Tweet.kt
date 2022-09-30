@@ -1,60 +1,66 @@
 package com.jonecx.qwit.ui
 
+import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jonecx.qwit.R
 import com.jonecx.qwit.model.Tweet
+import com.jonecx.qwit.ui.design.theme.Blue10
+import com.jonecx.qwit.ui.design.theme.Blue40
 import com.jonecx.qwit.ui.design.theme.QwitTypography
 import com.jonecx.qwit.util.toDate
 
 
 @Composable
-fun TweetView(tweet: Tweet) {
+fun TweetView(headTweet: Tweet) {
+    val tweet = headTweet.retweetedStatus ?: headTweet
+    val isShowRetweetedLabel = headTweet.retweetedStatus != null
     Column(
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
             .fillMaxWidth()
     ) {
-        Row(modifier = Modifier.padding(start = 42.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                modifier = Modifier.size(12.dp),
-                painter = painterResource(R.drawable.ic_heart_filled),
-                contentDescription = "liked" )
-            Text(
-                text = "Hermela Brook and Marta Solomon follow",
-                modifier = Modifier.padding(start = 9.dp),
-                style = QwitTypography.titleSmall,
-                color = Color.Gray,
-            )
+        if (isShowRetweetedLabel) {
+            Row(modifier = Modifier.padding(start = 42.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    painter = painterResource(R.drawable.ic_retweet),
+                    contentDescription = headTweet.user.name )
+                Text(
+                    text = "${headTweet.user.name} ${stringResource(id = R.string.retweeted)}",
+                    modifier = Modifier.padding(start = 9.dp),
+                    style = QwitTypography.titleSmall,
+                    color = Color.Gray,
+                )
+            }
         }
+
         Row(modifier = Modifier.padding(top = 2.dp)) {
             CircleAvatar(tweet)
             Column(modifier = Modifier.padding(start = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    AuthorNameView(tweet = tweet, modifier = Modifier.weight(0.7f, fill = false))
+                    AuthorNameView(tweet = tweet, modifier = Modifier.weight(0.6f, fill = false))
+                    val xyz = tweet.createdAt.toDate()
+                    print(xyz)
                     Text(modifier = Modifier.weight(0.3f), text = " • ${tweet.createdAt.toDate()}", style = QwitTypography.bodyMedium, color = Color.Gray, maxLines = 1)
                 }
                 Text(
@@ -83,7 +89,43 @@ fun TweetView(tweet: Tweet) {
 
 @Composable
 private fun AuthorNameView(modifier: Modifier, tweet: Tweet) {
-    Text(
+    val annotated = buildAnnotatedString {
+        val authorName = "${tweet.user.name} @${tweet.user.screenName}"
+        append(authorName)
+        addStyle(
+            style = SpanStyle(
+                fontWeight = FontWeight.W700,
+                fontSize = 16.sp,
+                letterSpacing = 0.1.sp
+            ),
+            start = 0,
+            end = authorName.indexOf("@")
+        )
+        addStyle(
+            style = SpanStyle(
+                fontWeight = FontWeight.W400,
+                fontSize = 14.sp,
+                letterSpacing = 0.25.sp
+            ),
+            start = authorName.indexOf("@"),
+            end = authorName.length - 1
+        )
+    }
+    ClickableText(text = annotated, onClick = { offset ->
+             val xyz = annotated.subSequence(0, 5)
+                xyz?.let {
+                        print("hi")
+                }
+
+            annotated.getStringAnnotations(tag = "terms", start = 5, end = 7).firstOrNull()?.let {
+                if (offset >=5)
+                    print("hey")
+            }
+    },
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier)
+/*    Text(
         buildAnnotatedString {
             val authorName = "${tweet.user.name} @${tweet.user.screenName}"
             append(authorName)
@@ -109,7 +151,7 @@ private fun AuthorNameView(modifier: Modifier, tweet: Tweet) {
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
-    )
+    )*/
 }
 
 @Composable
@@ -128,4 +170,39 @@ fun CircleAvatar(tweet: Tweet, size: Dp = 55.dp) {
     AsyncImage(modifier = Modifier
         .size(size)
         .clip(CircleShape), model = tweet.user.profileImageUrlHttps, contentDescription = tweet.user.name)
+}
+
+
+// for offline testing
+@Composable
+fun test() {
+    val annotatedString = buildAnnotatedString {
+        append("By joining, you agree to the ")
+
+        pushStringAnnotation(tag = "policy", annotation = "https://google.com/policy")
+        withStyle(style = SpanStyle(color = Blue40)) {
+            append("privacy policy")
+        }
+        pop()
+
+        append(" and ")
+
+        pushStringAnnotation(tag = "terms", annotation = "https://google.com/terms")
+
+        withStyle(style = SpanStyle(color = Blue40)) {
+            append("terms of use")
+        }
+
+        pop()
+    }
+
+    ClickableText(text = annotatedString, style = QwitTypography.bodyMedium, onClick = { offset ->
+        annotatedString.getStringAnnotations(tag = "policy", start = offset, end = offset).firstOrNull()?.let {
+            print("hei")
+        }
+
+        annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset).firstOrNull()?.let {
+            print("me")
+        }
+    })
 }

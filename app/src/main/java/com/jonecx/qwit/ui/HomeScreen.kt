@@ -112,7 +112,7 @@ fun HomeScreen(
 
                 LazyColumn {
                     items(tweets) { tweet ->
-                        TweetView(tweet = tweet)
+                        TweetView(tweet)
                     }
                 }
             }
